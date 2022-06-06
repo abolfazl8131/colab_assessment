@@ -6,6 +6,7 @@ import pandas as pd
 from scrapy.crawler import CrawlerProcess
 
 
+
 class DataScrapy(scrapy.Spider):
     name = 'ESG'
     df = pd.DataFrame()
@@ -32,8 +33,8 @@ class DataScrapy(scrapy.Spider):
                      'enviromnent':json_["esgScore"]['TR.EnvironmentPillar']['score'],
                      'rank':json_["industryComparison"]['rank']}
 
-        df = self.df.append(data_dict,ignore_index=True)
-        yield df.to_csv(filename,index=False)
+        self.df = self.df.append(data_dict,ignore_index=True)
+        yield self.df.to_csv(filename,index=False)
 
 
 
