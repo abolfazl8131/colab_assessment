@@ -8,7 +8,9 @@ from scrapy.crawler import CrawlerProcess
 
 class DataScrapy(scrapy.Spider):
     name = 'ESG'
-    start_urls = ['']
+    df = pd.DataFrame()
+    user_agent = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/22.0.1207.1 Safari/537.1"
+
     def start_requests(self):
         df = pd.read_csv('D:\desktop\colab2\crowler\crowler\spiders\companyName\company_name.csv')
         for ric_code in df['ricCode'].values:
@@ -20,11 +22,19 @@ class DataScrapy(scrapy.Spider):
     def parse(self, response):
 
         filename = 'ESG.csv'
-        f = open(filename,'wb')
-        ric_code = response.request.url.split('=')[-1]
 
-        df = pd.read_json(response.body)
-        print(df)
+        ric_code = response.request.url.split('=')[-1]
+        json_ = json.loads(response.text)
+
+        data_dict = {'code': ric_code,
+                     'goverance':json_["esgScore"]['TR.GovernancePillar']['score'],
+                     'social':json_["esgScore"]['TR.SocialPillar']['score'],
+                     'enviromnent':json_["esgScore"]['TR.EnvironmentPillar']['score'],
+                     'rank':json_["industryComparison"]['rank']}
+
+        df = self.df.append(data_dict,ignore_index=True)
+        yield df.to_csv(filename,index=False)
+
 
 
 
